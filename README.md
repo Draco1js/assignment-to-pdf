@@ -43,7 +43,7 @@ This tool is perfect for creating beautiful PDFs of your programming homework! H
 
 
 
-### Example Output: (Script is below this)
+### Example Output: (The script is below this)
 ![](https://github.com/Draco1js/assignment-to-pdf/blob/main/Example.png?raw=true)
 
 
