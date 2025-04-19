@@ -54,5 +54,8 @@
   ],
   "resolutions": {
     "fsevents": "^2.3.3"
+  },
+  "overrides": {
+    "fsevents": "^2.3.3"
   }
 }
