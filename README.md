@@ -365,7 +365,7 @@ def generate_documentation(results):
 			doc_file.write("---\\n\\n")
 	
 	print(f"\\nDocumentation generated: {DOCUMENTATION_FILENAME}")
-	print(f"To convert to PDF: Copy the contents of {DOCUMENTATION_FILENAME} and paste at \\n\\nhttps://md2pdf.netlify.app/\\n\\n")
+	print(f"To convert to PDF: Copy the contents of {DOCUMENTATION_FILENAME} and paste at \\n\\nhttps://assignment-to-pdf.dracodev.me/\\n\\n")
 
 def main():
 	print("Starting Homework Helper...")
