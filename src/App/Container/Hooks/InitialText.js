@@ -4,16 +4,16 @@ export const initialText = `# md2pdf + Assignment compiler for C++
 
 Original md2pdf project by: https://github.com/realdennis/md2pdf/
 
-![](https://github.com/Draco1js/md2pdf-assignment/Example.png)
 
-## Automatic C/C++ Homework Documentation
+## Automatic C++ Homework Documentation
+
 
 This tool is perfect for creating beautiful PDFs of your programming homework! Here's a helpful script that automatically:
 
-1. Compiles all your C/C++ files
+1. Compiles all your C++ files
 2. Runs each executable (with user input when needed)
 3. Creates a markdown file with code and output for each question
-4. Ready to paste into md2pdf for a professional PDF!
+4. Ready to paste into md2pdf for a proper PDF!
 
 ### How to use the script:
 
@@ -31,22 +31,30 @@ This tool is perfect for creating beautiful PDFs of your programming homework! H
 	 │   └── q5.cpp
 	 \`\`\`
 
-2. Copy the script below to a file named \`homework_helper.py\` in the root folder of your homework
-3. Run it: \`python3 homework_helper.py\`
+2. Copy the script below to a file named \`script.py\` in the root folder of your homework
+3. Make sure to change the \`DOCUMENTATION_TITLE\`, \`CONSOLE_PREFIX\` and \`DOCUMENTATION_FILENAME\` variables
+3. Run it: \`python3 script.py\`
 4. Copy the content of the generated markdown file
 5. Paste it into this site and generate your PDF!
 
 ### Requirements:
 - g++ must be installed
+- Python3 must be installed
 - Script works on Linux/Unix-based operating systems (not yet tested on Windows)
 - If you find issues on Windows, please make a pull request!
+
+
+
+### Example Output: (Script is below this)
+![](https://github.com/Draco1js/assignment-to-pdf/blob/main/Example.png?raw=true)
+
 
 ### The Script:
 \`\`\`python
 #!/usr/bin/env python3
 """
 Homework Helper Script
-- Compiles all C/C++ files in the current directory
+- Compiles all C++ files in the current directory
 - Runs each executable (with user input if needed)
 - Creates a documentation file with code and output for each question
 """
@@ -69,6 +77,10 @@ import threading
 DOCUMENTATION_TITLE = "24K-2015 Lab 9"
 CONSOLE_PREFIX = "aayan@Macbook-Air:"
 DOCUMENTATION_FILENAME = "24K-2015_Lab_9_Tasks.md"
+
+
+
+# Markdown settings
 SEPARATOR_LENGTH = 40
 SEPARATOR_CHAR = "-"
 
