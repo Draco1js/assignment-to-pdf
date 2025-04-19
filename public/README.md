@@ -1,10 +1,34 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c4c9c07a-bd99-4382-8b19-4ae3abc8f104/deploy-status)](https://app.netlify.com/sites/md2pdf/deploys)
 
+![Deploy gh-pages](https://github.com/realdennis/md2pdf/actions/workflows/deploy.yaml/badge.svg)
 
-export const initialText = `# md2pdf + Assignment compiler for C++
+# Markdown2PDF
+English | [简体中文(Simplified Chinese)](./README_cn.md) | [繁體中文(Traditional Chinese)](./README_tc.md)  
+https://md2pdf.netlify.app/
 
-Original md2pdf project by: https://github.com/realdennis/md2pdf/
+https://realdennis.github.io/md2pdf/
 
-![](https://github.com/Draco1js/md2pdf-assignment/Example.png)
+![It just works!](https://media.giphy.com/media/MuAtuqUGnn2PKsXhs6/giphy.gif)
+
+![Upload](https://media.giphy.com/media/cZ1f4b46P3LGszuXuy/giphy.gif)
+
+> Awesome Markdown to PDF!
+```diff
+- Online? Upload resume.md to stranger server?
++ Try Offline Web App!
+```
+
+## How to use md2pdf?
+1. Click button choose `.md` file.
+2. Edit in editor (left panel).
+3. Click **Transform**!
+4. Switch 'Destination' to **Save as PDF**.
+5. **Chrome recommended**
+
+## Tips
+- `Resize` the layout what you want.
+- After click `Transform` button, inverse the checkbox of **'Headers and Footers'**. 
+- **反選頁首與頁尾**.
 
 ## Automatic C/C++ Homework Documentation
 
@@ -18,9 +42,9 @@ This tool is perfect for creating beautiful PDFs of your programming homework! H
 ### How to use the script:
 
 1. Make sure your homework files follow this naming convention:
-	- Single file questions: \`q1.cpp\`, \`q2.cpp\`, etc.
-	- Multi-file questions:
-	 \`\`\`
+   - Single file questions: `q1.cpp`, `q2.cpp`, etc.
+   - Multi-file questions:
+	 ```
 	 ├── q1.cpp
 	 ├── q2.cpp
 	 ├── q3.cpp
@@ -29,12 +53,13 @@ This tool is perfect for creating beautiful PDFs of your programming homework! H
 	 │   ├── HelperFile.cpp
 	 │   ├── HelperFile.h
 	 │   └── q5.cpp
-	 \`\`\`
+	 ```
 
-2. Copy the script below to a file named \`homework_helper.py\` in the root folder of your homework
-3. Run it: \`python3 homework_helper.py\`
-4. Copy the content of the generated markdown file
-5. Paste it into this site and generate your PDF!
+2. Copy the script below to a file named `homework_helper.py` in the root folder of your homework
+3. Make it executable: `chmod +x homework_helper.py`
+4. Run it: `./homework_helper.py`
+5. Copy the content of the generated markdown file
+6. Paste it into md2pdf and generate your PDF!
 
 ### Requirements:
 - g++ must be installed
@@ -42,7 +67,7 @@ This tool is perfect for creating beautiful PDFs of your programming homework! H
 - If you find issues on Windows, please make a pull request!
 
 ### The Script:
-\`\`\`python
+```python
 #!/usr/bin/env python3
 """
 Homework Helper Script
@@ -58,12 +83,6 @@ import glob
 import sys
 import shlex
 import time
-import fcntl
-import msvcrt
-import queue
-import threading
-
-
 
 # Global configuration variables
 DOCUMENTATION_TITLE = "24K-2015 Lab 9"
@@ -89,7 +108,7 @@ def read_file_content(file_path):
 
 def run_executable(executable):
 	"""Run executable and capture output."""
-	print(f"\\nRunning {executable}:")
+	print(f"\nRunning {executable}:")
 	print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
 	
 	# Run the program and capture its output
@@ -117,6 +136,7 @@ def run_executable(executable):
 		# Set up platform-specific I/O handling
 		if os.name != 'nt':  # Unix/Linux/Mac
 			# Set up non-blocking I/O using fcntl
+			import fcntl
 			
 			# Set stdout to non-blocking
 			flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
@@ -156,7 +176,7 @@ def run_executable(executable):
 				# If no output for a while, assume waiting for input
 				if time.time() - last_output_time > max_idle_time:
 					user_input = input("")  # Simple prompt like a terminal
-					process.stdin.write(user_input + "\\n")
+					process.stdin.write(user_input + "\n")
 					process.stdin.flush()
 					all_output.append(user_input)
 					last_output_time = time.time()
@@ -165,14 +185,17 @@ def run_executable(executable):
 				time.sleep(0.1)
 		else:
 			# Windows-specific interaction loop
+			import msvcrt
+			import queue
+			import threading
 			
 			# Function to read input in a separate thread
 			def input_reader(input_queue):
 				while process.poll() is None:
 					if msvcrt.kbhit():
 						char = msvcrt.getch().decode('utf-8')
-						if char == '\\r':  # Enter key
-							input_queue.put('\\n')
+						if char == '\r':  # Enter key
+							input_queue.put('\n')
 						else:
 							input_queue.put(char)
 					time.sleep(0.05)
@@ -204,9 +227,9 @@ def run_executable(executable):
 				# Check for user input
 				try:
 					char = input_queue.get_nowait()
-					if char == '\\n':  # Enter key pressed
+					if char == '\n':  # Enter key pressed
 						print()  # New line
-						process.stdin.write(user_input_buffer + '\\n')
+						process.stdin.write(user_input_buffer + '\n')
 						process.stdin.flush()
 						all_output.append(user_input_buffer)
 						user_input_buffer = ""
@@ -231,14 +254,14 @@ def run_executable(executable):
 		print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
 		
 		# Join all output lines into a single string
-		full_output = '\\n'.join(all_output)
+		full_output = '\n'.join(all_output)
 		return full_output
 		
 	except Exception as e:
 		error_msg = f"Error running {executable}: {e}"
 		print(error_msg)
 		print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
-		return f"Running {executable}:\\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}\\n{error_msg}\\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}"
+		return f"Running {executable}:\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}\n{error_msg}\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}"
 
 def compile_and_run():
 	"""Compile and run all C/C++ files, return results dictionary."""
@@ -257,7 +280,7 @@ def compile_and_run():
 		if q_num == 0:
 			continue
 			
-		print(f"\\nProcessing Question {q_num}...")
+		print(f"\nProcessing Question {q_num}...")
 		
 		# Determine if it's a directory-based question
 		is_dir_question = '/' in file_path
@@ -326,36 +349,36 @@ def generate_documentation(results):
 	"""Generate documentation file with code and output."""
 	
 	with open(DOCUMENTATION_FILENAME, 'w') as doc_file:
-		doc_file.write(f"# {DOCUMENTATION_TITLE}\\n\\n")
+		doc_file.write(f"# {DOCUMENTATION_TITLE}\n\n")
 		
 		for q_num in sorted(results.keys()):
-			doc_file.write(f"## Question {q_num}\\n\\n")
+			doc_file.write(f"## Question {q_num}\n\n")
 			
 			# Write code for each file
-			doc_file.write("### Code\\n\\n")
+			doc_file.write("### Code\n\n")
 			for filename, content in results[q_num]['files'].items():
-				doc_file.write(f"**File: {filename}**\\n\\n")
-				doc_file.write("\`\`\`cpp\\n")
+				doc_file.write(f"**File: {filename}**\n\n")
+				doc_file.write("```cpp\n")
 				doc_file.write(content)
-				doc_file.write("\\n\`\`\`\\n\\n")
+				doc_file.write("\n```\n\n")
 			
 			# Write compilation output if there was any
 			if results[q_num]['compile_output'].strip():
-				doc_file.write("### Compilation Output\\n\\n")
-				doc_file.write("\`\`\`bash\\n")
+				doc_file.write("### Compilation Output\n\n")
+				doc_file.write("```bash\n")
 				doc_file.write(results[q_num]['compile_output'])
-				doc_file.write("\\n\`\`\`\\n\\n")
+				doc_file.write("\n```\n\n")
 			
 			# Write execution output
-			doc_file.write("### Execution Output\\n\\n")
-			doc_file.write("\`\`\`bash\\n")
+			doc_file.write("### Execution Output\n\n")
+			doc_file.write("```bash\n")
 			doc_file.write(results[q_num]['run_output'])
-			doc_file.write("\\n\`\`\`\\n\\n")
+			doc_file.write("\n```\n\n")
 			
-			doc_file.write("---\\n\\n")
+			doc_file.write("---\n\n")
 	
-	print(f"\\nDocumentation generated: {DOCUMENTATION_FILENAME}")
-	print(f"To convert to PDF: Copy the contents of {DOCUMENTATION_FILENAME} and paste at \\n\\nhttps://md2pdf.netlify.app/\\n\\n")
+	print(f"\nDocumentation generated: {DOCUMENTATION_FILENAME}")
+	print(f"To convert to PDF: Copy the contents of {DOCUMENTATION_FILENAME} and paste at \n\nhttps://md2pdf.netlify.app/\n\n")
 
 def main():
 	print("Starting Homework Helper...")
@@ -365,7 +388,12 @@ def main():
 
 if __name__ == "__main__":
 	main()
-\`\`\`
+```
 
-LICENSE ISC © 2025 Draco1js
-`;
+## What's special?
+- You can use <span style="color:#0984e3">html</span> tag!
+<blockquote>Hey I'm in blockquote!</blockquote>
+
+---
+
+LICENSE MIT © 2019 realdennis
