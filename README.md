@@ -52,7 +52,7 @@ This tool is perfect for creating beautiful PDFs of your programming homework! H
 #!/usr/bin/env python3
 """
 Homework Helper Script
-- Compiles all C++ files in the current directory
+- Compiles all C/C++ files in the current directory
 - Runs each executable (with user input if needed)
 - Creates a documentation file with code and output for each question
 """
@@ -64,27 +64,20 @@ import glob
 import sys
 import shlex
 import time
-import fcntl
-import msvcrt
-import queue
-import threading
-
-
 
 # Global configuration variables
-DOCUMENTATION_TITLE = "24K-2015 Lab 9"
-CONSOLE_PREFIX = "aayan@Macbook-Air:"
-DOCUMENTATION_FILENAME = "24K-2015_Lab_9_Tasks.md"
+DOCUMENTATION_TITLE = "Lab Tasks"
+CONSOLE_PREFIX = "C://Homework"
+DOCUMENTATION_FILENAME = "Lab_Tasks.md"
 
 
-
-# Markdown settings
+## Markdown settings
 SEPARATOR_LENGTH = 40
 SEPARATOR_CHAR = "-"
 
 def extract_question_number(filename):
     """Extract question number from filename."""
-    match = re.search(r'q(d+)', os.path.basename(filename))
+    match = re.search(r'q(\d+)', os.path.basename(filename))
     if match:
         return int(match.group(1))
     return 0
@@ -127,6 +120,7 @@ def run_executable(executable):
         # Set up platform-specific I/O handling
         if os.name != 'nt':  # Unix/Linux/Mac
             # Set up non-blocking I/O using fcntl
+            import fcntl
             
             # Set stdout to non-blocking
             flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
@@ -175,6 +169,9 @@ def run_executable(executable):
                 time.sleep(0.1)
         else:
             # Windows-specific interaction loop
+            import msvcrt
+            import queue
+            import threading
             
             # Function to read input in a separate thread
             def input_reader(input_queue):
