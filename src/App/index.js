@@ -25,6 +25,25 @@ const MobileBanner = styled.div`
   @media (max-width: 480px) {
     display: ${props => props.visible ? 'flex' : 'none'};
   }
+  // @media print {
+  //   &,
+  //   div {
+  //     display: block;
+  //     height: auto;
+  //     /* Reset to normalize for FireFox */
+  //   }
+  //   .no-print,
+  //   .no-print * {
+  //     display: none !important;
+  //   }
+    
+  //   /* Ensure backgrounds are printed */
+  //   * {
+  //     -webkit-print-color-adjust: exact !important;
+  //     color-adjust: exact !important;
+  //     print-color-adjust: exact !important;
+  //   }
+  // }
   
   button {
     position: absolute;
@@ -46,14 +65,14 @@ const MobileBanner = styled.div`
 
 const App = ({ className }) => {
   const [showMobileBanner, setShowMobileBanner] = useState(false);
-  
+
   const closeBanner = () => {
     setShowMobileBanner(false);
   };
-  
+
   return (
     <div className={className} id="md2pdf-app">
-      <MobileBanner visible={false}>
+      <MobileBanner visible={false} className='no-print'>
         This site isn't optimized for mobile devices. Please use a desktop for the best experience.
         <button onClick={closeBanner}>×</button>
       </MobileBanner>
