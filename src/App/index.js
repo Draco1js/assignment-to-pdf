@@ -45,7 +45,7 @@ const MobileBanner = styled.div`
 `;
 
 const App = ({ className }) => {
-  const [showMobileBanner, setShowMobileBanner] = useState(true);
+  const [showMobileBanner, setShowMobileBanner] = useState(false);
   
   const closeBanner = () => {
     setShowMobileBanner(false);
@@ -53,7 +53,7 @@ const App = ({ className }) => {
   
   return (
     <div className={className} id="md2pdf-app">
-      <MobileBanner visible={showMobileBanner}>
+      <MobileBanner visible={false}>
         This site isn't optimized for mobile devices. Please use a desktop for the best experience.
         <button onClick={closeBanner}>×</button>
       </MobileBanner>
