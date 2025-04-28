@@ -94,7 +94,7 @@ def read_file_content(file_path):
 
 def run_executable(executable):
     """Run executable and capture output."""
-    print(f"\nRunning {executable}:")
+    print(f"\\nRunning {executable}:")
     print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     
     # Run the program and capture its output
@@ -162,7 +162,7 @@ def run_executable(executable):
                 # If no output for a while, assume waiting for input
                 if time.time() - last_output_time > max_idle_time:
                     user_input = input("")  # Simple prompt like a terminal
-                    process.stdin.write(user_input + "\n")
+                    process.stdin.write(user_input + "\\n")
                     process.stdin.flush()
                     all_output.append(user_input)
                     last_output_time = time.time()
@@ -181,7 +181,7 @@ def run_executable(executable):
                     if msvcrt.kbhit():
                         char = msvcrt.getch().decode('utf-8')
                         if char == '\r':  # Enter key
-                            input_queue.put('\n')
+                            input_queue.put('\\n')
                         else:
                             input_queue.put(char)
                     time.sleep(0.05)
@@ -213,9 +213,9 @@ def run_executable(executable):
                 # Check for user input
                 try:
                     char = input_queue.get_nowait()
-                    if char == '\n':  # Enter key pressed
+                    if char == '\\n':  # Enter key pressed
                         print()  # New line
-                        process.stdin.write(user_input_buffer + '\n')
+                        process.stdin.write(user_input_buffer + '\\n')
                         process.stdin.flush()
                         all_output.append(user_input_buffer)
                         user_input_buffer = ""
@@ -240,14 +240,14 @@ def run_executable(executable):
         print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
         
         # Join all output lines into a single string
-        full_output = '\n'.join(all_output)
+        full_output = '\\n'.join(all_output)
         return full_output
         
     except Exception as e:
         error_msg = f"Error running {executable}: {e}"
         print(error_msg)
         print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
-        return f"Running {executable}:\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}\n{error_msg}\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}"
+        return f"Running {executable}:\\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}\\n{error_msg}\\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}"
 
 def compile_and_run():
     """Compile and run all C/C++ files, return results dictionary."""
@@ -266,7 +266,7 @@ def compile_and_run():
         if q_num == 0:
             continue
             
-        print(f"\nProcessing Question {q_num}...")
+        print(f"\\nProcessing Question {q_num}...")
         
         # Determine if it's a directory-based question
         is_dir_question = '/' in file_path
@@ -335,36 +335,36 @@ def generate_documentation(results):
     """Generate documentation file with code and output."""
     
     with open(DOCUMENTATION_FILENAME, 'w') as doc_file:
-        doc_file.write(f"# {DOCUMENTATION_TITLE}\n\n")
+        doc_file.write(f"# {DOCUMENTATION_TITLE}\\n\\n")
         
         for q_num in sorted(results.keys()):
-            doc_file.write(f"## Question {q_num}\n\n")
+            doc_file.write(f"## Question {q_num}\\n\\n")
             
             # Write code for each file
-            doc_file.write("### Code\n\n")
+            doc_file.write("### Code\\n\\n")
             for filename, content in results[q_num]['files'].items():
-                doc_file.write(f"**File: {filename}**\n\n")
-                doc_file.write("\`\`\`cpp\n")
+                doc_file.write(f"**File: {filename}**\\n\\n")
+                doc_file.write("\`\`\`cpp\\n")
                 doc_file.write(content)
-                doc_file.write("\n\`\`\`\n\n")
+                doc_file.write("\\n\`\`\`\\n\\n")
             
             # Write compilation output if there was any
             if results[q_num]['compile_output'].strip():
-                doc_file.write("### Compilation Output\n\n")
-                doc_file.write("\`\`\`bash\n")
+                doc_file.write("### Compilation Output\\n\\n")
+                doc_file.write("\`\`\`bash\\n")
                 doc_file.write(results[q_num]['compile_output'])
-                doc_file.write("\n\`\`\`\n\n")
+                doc_file.write("\\n\`\`\`\\n\\n")
             
             # Write execution output
-            doc_file.write("### Execution Output\n\n")
-            doc_file.write("\`\`\`bash\n")
+            doc_file.write("### Execution Output\\n\\n")
+            doc_file.write("\`\`\`bash\\n")
             doc_file.write(results[q_num]['run_output'])
-            doc_file.write("\n\`\`\`\n\n")
+            doc_file.write("\\n\`\`\`\\n\\n")
             
-            doc_file.write("---\n\n")
+            doc_file.write("---\\n\\n")
     
-    print(f"\nDocumentation generated: {DOCUMENTATION_FILENAME}")
-    print(f"To convert to PDF: Copy the contents of {DOCUMENTATION_FILENAME} and paste at \n\nhttps://assignment-to-pdf.dracodev.me/\n\n")
+    print(f"\\nDocumentation generated: {DOCUMENTATION_FILENAME}")
+    print(f"To convert to PDF: Copy the contents of {DOCUMENTATION_FILENAME} and paste at \\n\\nhttps://assignment-to-pdf.dracodev.me/\\n\\n")
 
 def main():
     print("Starting Homework Helper...")
