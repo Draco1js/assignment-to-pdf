@@ -51,7 +51,7 @@ This tool is perfect for creating beautiful PDFs of your programming homework! H
 
 ### The Script:
 
-Go to (this README)[https://github.com/Draco1js/assignment-to-pdf] and copy the script, run with \`python3 script.py\`, enjoy!
+Go to [this README](https://github.com/Draco1js/assignment-to-pdf) and copy the script, run with \`python3 script.py\`, enjoy!
 
 LICENSE ISC © 2025 Draco1js
 `;
