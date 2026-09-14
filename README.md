@@ -52,9 +52,19 @@ This tool is perfect for creating beautiful PDFs of your programming homework! H
 #!/usr/bin/env python3
 """
 Homework Helper Script
-- Compiles all C/C++ files in the current directory
-- Runs each executable (with user input if needed)
-- Creates a documentation file with code and output for each question
+
+This script compiles all C/C++ files (named q*.c or q*.cpp) in the current directory,
+runs them, and generates a Markdown documentation file with the source code and outputs.
+
+Usage:
+  python3 script.py [OPTIONS]
+
+Options:
+  -NUM STRING      Provide stdin input for a specific question. 
+                   Example: -5 "6" (Feeds '6' into Question 5's standard input)
+                   Example: -1 "Hello World\nMulti-line" 
+  --aNUM STRING    Provide command-line arguments for a specific question.
+                   Example: --a7 "add 5 3 multiply 6 7" (Runs ./q7_exec add 5 3 multiply 6 7)
 """
 
 import os
@@ -63,17 +73,56 @@ import re
 import glob
 import sys
 import shlex
-import time
 
 # Global configuration variables
 DOCUMENTATION_TITLE = "Lab Tasks"
-CONSOLE_PREFIX = "C://Homework"
+CONSOLE_PREFIX = "~/Desktop/Lab/"
 DOCUMENTATION_FILENAME = "Lab_Tasks.md"
-
 
 ## Markdown settings
 SEPARATOR_LENGTH = 40
 SEPARATOR_CHAR = "-"
+
+
+def parse_arguments():
+    """Parse command line arguments for predefined inputs and args."""
+    inputs = {}
+    cli_args = {}
+    
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        
+        # Match -NUM for stdin (e.g., -5 "6\n")
+        match_in = re.match(r'^-(\d+)$', arg)
+        if match_in:
+            q_num = int(match_in.group(1))
+            if i + 1 < len(sys.argv):
+                # Ensure input ends with newline so scanf/cin doesn't hang
+                val = sys.argv[i+1]
+                if not val.endswith('\n'):
+                    val += '\n'
+                inputs[q_num] = val
+                i += 2
+                continue
+                
+        # Match --aNUM for args (e.g., --a7 "add 5 3")
+        match_args = re.match(r'^--a(\d+)$', arg)
+        if match_args:
+            q_num = int(match_args.group(1))
+            if i + 1 < len(sys.argv):
+                cli_args[q_num] = shlex.split(sys.argv[i+1])
+                i += 2
+                continue
+                
+        # Help text
+        if arg in ('-h', '--help'):
+            print(__doc__)
+            sys.exit(0)
+            
+        i += 1
+        
+    return inputs, cli_args
 
 def extract_question_number(filename):
     """Extract question number from filename."""
@@ -90,164 +139,66 @@ def read_file_content(file_path):
     except Exception as e:
         return f"Error reading file: {e}"
 
-def run_executable(executable):
+def run_executable(executable, q_num, predefined_input=None, custom_args=None):
     """Run executable and capture output."""
     print(f"\nRunning {executable}:")
     print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
     
-    # Run the program and capture its output
+    args = custom_args if custom_args else []
+    cmd = [f"./{executable}"] + args
+    if os.name == 'nt':
+        cmd = [executable] + args
+        
+    all_output = []
+    cmd_str = " ".join(cmd)
+    all_output.append(f"{CONSOLE_PREFIX} {cmd_str}")
+    
     try:
-        # Buffer for storing all output
-        all_output = []
-        all_output.append(f"{CONSOLE_PREFIX} ./{executable}")
-        
-        # Platform-specific executable path
-        exec_path = f"./{executable}"
-        if os.name == 'nt':  # Windows
-            exec_path = executable  # No ./ prefix needed on Windows
-        
-        # Start the process
-        process = subprocess.Popen(
-            exec_path,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-            text=True,
-            bufsize=1
-        )
-        
-        # Set up platform-specific I/O handling
-        if os.name != 'nt':  # Unix/Linux/Mac
-            # Set up non-blocking I/O using fcntl
-            import fcntl
-            
-            # Set stdout to non-blocking
-            flags = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
-            fcntl.fcntl(process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-            
-            # Set stderr to non-blocking
-            flags = fcntl.fcntl(process.stderr, fcntl.F_GETFL)
-            fcntl.fcntl(process.stderr, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-            
-            # Process interaction loop for Unix systems
-            max_idle_time = 1.0  # seconds to wait before prompting for input
-            last_output_time = time.time()
-            
-            while process.poll() is None:  # While process is running
-                # Try to read from stdout
-                try:
-                    output = process.stdout.readline()
-                    if output:
-                        print(output.strip())
-                        all_output.append(output.strip())
-                        last_output_time = time.time()
-                        continue
-                except (IOError, BlockingIOError):
-                    pass
-                    
-                # Try to read from stderr
-                try:
-                    error = process.stderr.readline()
-                    if error:
-                        print(error.strip())
-                        all_output.append(error.strip())
-                        last_output_time = time.time()
-                        continue
-                except (IOError, BlockingIOError):
-                    pass
-                    
-                # If no output for a while, assume waiting for input
-                if time.time() - last_output_time > max_idle_time:
-                    user_input = input("")  # Simple prompt like a terminal
-                    process.stdin.write(user_input + "\n")
-                    process.stdin.flush()
-                    all_output.append(user_input)
-                    last_output_time = time.time()
-                
-                # Small sleep to prevent CPU hogging
-                time.sleep(0.1)
+        if predefined_input is not None:
+            # Auto-feed predefined input
+            all_output.append(f"[Auto-fed input]: {predefined_input.strip()}")
+            process = subprocess.run(
+                cmd,
+                input=predefined_input,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=30
+            )
+            if process.stdout:
+                print(process.stdout.strip())
+                all_output.append(process.stdout.strip())
         else:
-            # Windows-specific interaction loop
-            import msvcrt
-            import queue
-            import threading
+            # Interactive mode (inherits stdin, captures stdout line by line)
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
             
-            # Function to read input in a separate thread
-            def input_reader(input_queue):
-                while process.poll() is None:
-                    if msvcrt.kbhit():
-                        char = msvcrt.getch().decode('utf-8')
-                        if char == '\r':  # Enter key
-                            input_queue.put('\n')
-                        else:
-                            input_queue.put(char)
-                    time.sleep(0.05)
-            
-            # Create a queue for input and start the input reader thread
-            input_queue = queue.Queue()
-            input_thread = threading.Thread(target=input_reader, args=(input_queue,))
-            input_thread.daemon = True
-            input_thread.start()
-            
-            # Buffer for collecting user input
-            user_input_buffer = ""
-            
-            # Process interaction loop for Windows
-            while process.poll() is None:
-                # Check for output
-                output = process.stdout.readline()
-                if output:
-                    print(output.strip())
-                    all_output.append(output.strip())
-                    continue
+            for line in iter(process.stdout.readline, ''):
+                print(line, end='', flush=True)
+                all_output.append(line.rstrip('\n'))
                 
-                error = process.stderr.readline()
-                if error:
-                    print(error.strip())
-                    all_output.append(error.strip())
-                    continue
-                
-                # Check for user input
-                try:
-                    char = input_queue.get_nowait()
-                    if char == '\n':  # Enter key pressed
-                        print()  # New line
-                        process.stdin.write(user_input_buffer + '\n')
-                        process.stdin.flush()
-                        all_output.append(user_input_buffer)
-                        user_input_buffer = ""
-                    else:
-                        print(char, end='', flush=True)
-                        user_input_buffer += char
-                except queue.Empty:
-                    pass
-                
-                # Small sleep to prevent CPU hogging
-                time.sleep(0.1)
-        
-        # Get any remaining output
-        remaining_stdout, remaining_stderr = process.communicate()
-        if remaining_stdout:
-            print(remaining_stdout.strip())
-            all_output.append(remaining_stdout.strip())
-        if remaining_stderr:
-            print(remaining_stderr.strip())
-            all_output.append(remaining_stderr.strip())
-        
+            process.wait(timeout=30)
+            
         print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
+        return '\n'.join(all_output)
         
-        # Join all output lines into a single string
-        full_output = '\n'.join(all_output)
-        return full_output
-        
+    except subprocess.TimeoutExpired as e:
+        error_msg = f"Timeout expired after {e.timeout}s"
+        print(error_msg)
+        all_output.append(error_msg)
+        return '\n'.join(all_output)
     except Exception as e:
         error_msg = f"Error running {executable}: {e}"
         print(error_msg)
-        print(SEPARATOR_CHAR * SEPARATOR_LENGTH)
-        return f"Running {executable}:\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}\n{error_msg}\n{SEPARATOR_CHAR * SEPARATOR_LENGTH}"
+        all_output.append(error_msg)
+        return '\n'.join(all_output)
 
-def compile_and_run():
+def compile_and_run(inputs, cli_args):
     """Compile and run all C/C++ files, return results dictionary."""
     results = {}
     
@@ -284,14 +235,12 @@ def compile_and_run():
         compile_cmd = []
         
         if is_dir_question:
-            # For directory-based questions, compile all .cpp files in the directory
             source_files = glob.glob(f"{dir_name}/*.cpp") + glob.glob(f"{dir_name}/*.c")
             if file_path.endswith('.cpp'):
                 compile_cmd = ["g++"] + source_files + ["-o", executable]
             else:
                 compile_cmd = ["gcc"] + source_files + ["-o", executable]
         else:
-            # For single file questions
             if file_path.endswith('.cpp'):
                 compile_cmd = ["g++", file_path, "-o", executable]
             else:
@@ -311,8 +260,10 @@ def compile_and_run():
             }
             continue
         
-        # Run the executable
-        run_output = run_executable(executable)
+        # Run the executable with dynamic inputs/args
+        q_in = inputs.get(q_num)
+        q_args = cli_args.get(q_num)
+        run_output = run_executable(executable, q_num, predefined_input=q_in, custom_args=q_args)
         
         # Store results
         results[q_num] = {
@@ -331,7 +282,6 @@ def compile_and_run():
 
 def generate_documentation(results):
     """Generate documentation file with code and output."""
-    
     with open(DOCUMENTATION_FILENAME, 'w') as doc_file:
         doc_file.write(f"# {DOCUMENTATION_TITLE}\n\n")
         
@@ -342,21 +292,22 @@ def generate_documentation(results):
             doc_file.write("### Code\n\n")
             for filename, content in results[q_num]['files'].items():
                 doc_file.write(f"**File: {filename}**\n\n")
-                doc_file.write("```cpp\n")
-                doc_file.write(content)
+                lang = "cpp" if filename.endswith(".cpp") else "c"
+                doc_file.write(f"```{lang}\n")
+                doc_file.write(content.strip())
                 doc_file.write("\n```\n\n")
             
             # Write compilation output if there was any
             if results[q_num]['compile_output'].strip():
                 doc_file.write("### Compilation Output\n\n")
                 doc_file.write("```bash\n")
-                doc_file.write(results[q_num]['compile_output'])
+                doc_file.write(results[q_num]['compile_output'].strip())
                 doc_file.write("\n```\n\n")
             
             # Write execution output
             doc_file.write("### Execution Output\n\n")
             doc_file.write("```bash\n")
-            doc_file.write(results[q_num]['run_output'])
+            doc_file.write(results[q_num]['run_output'].strip())
             doc_file.write("\n```\n\n")
             
             doc_file.write("---\n\n")
@@ -365,8 +316,9 @@ def generate_documentation(results):
     print(f"To convert to PDF: Copy the contents of {DOCUMENTATION_FILENAME} and paste at \n\nhttps://assignment-to-pdf.dracodev.me/\n\n")
 
 def main():
+    inputs, cli_args = parse_arguments()
     print("Starting Homework Helper...")
-    results = compile_and_run()
+    results = compile_and_run(inputs, cli_args)
     generate_documentation(results)
     print("Done!")
 
